@@ -145,11 +145,16 @@ std::string toLower(std::string word) {
 }
 
 int main() {
-    setlocale(LC_ALL, "RUS");
     system("chcp 1251");
-    std::string input1path = "input1.txt";
-    std::string input2path = "input2.txt";
-    std::string outputpath = "output.txt";
+    std::string input1path;
+    std::string input2path;
+    std::string outputpath;
+    std::cout << "Введите имя файла с текстом: ";
+    std::cin >> input1path;
+    std::cout << "Введите имя файла с запрещенными словами: ";
+    std::cin >> input2path;
+    std::cout << "Введите имя выходного файла: ";
+    std::cin >> outputpath;
     std::ifstream input1(input1path);
     std::ifstream input2(input2path);
     std::ofstream output(outputpath);
@@ -176,16 +181,18 @@ int main() {
                 word = word + line[i];
                 i++;
             }
-            std::string last_word = word;
-            if (line.back() == '-') {
+            std::string last_word;
+            if (line.back() == '-' && alphabet.count(line[line.length() - 2]) == 1) {
                 std::getline(input2, line);
-                std::cout << "Перенос: " << line << std::endl;
-                int i = 0;
-                while (alphabet.count(line[i]) == 1) {
-                    word = word + line[i];
-                    i++;
+                //std::cout << "Перенос: " << line << std::endl;
+                int c = 0;
+                while (alphabet.count(line[c]) == 1) {
+                    last_word = last_word + line[c];
+                    c++;
                 }
-                last_word = last_word + word;
+                word = word + last_word;
+                i = c;
+                len = line.length();
             }
             if (!word.empty()) {
                 forbidden_words.push_back(toLower(word));
@@ -194,9 +201,11 @@ int main() {
             i++;
         }
     }
+    std::cout << "Запрещенные слова: ";
     for (int i = 0; i < forbidden_words.size(); i++) {
-        std::cout << forbidden_words[i] << std::endl;
+        std::cout << forbidden_words[i] << ' ';
     }
+    std::cout << "Текст: ";
     while (std::getline(input1, line)) {
         size_t len = line.length();
         int i = 0;
@@ -206,20 +215,23 @@ int main() {
                 i++;
             }
             std::string last_word;
-            if (line.back() == '-') {
+            if (line.back() == '-' && alphabet.count(line[line.length() - 2]) == 1) {
                 std::getline(input1, line);
-                std::cout << "Перенос: " << line << std::endl;
-                int i = 0;
-                while (alphabet.count(line[i]) == 1) {
-                    last_word = last_word + line[i];
-                    i++;
+                //std::cout << "Перенос: " << line << std::endl;
+                int c = 0;
+                while (alphabet.count(line[c]) == 1) {
+                    last_word = last_word + line[c];
+                    c++;
                 }
                 word = word + last_word;
+                i = c;
+                len = line.length();
             }
+            std::cout << word << ' ';
             if (std::count(forbidden_words.begin(), forbidden_words.end(), toLower(word))) {
                 size_t len = word.length();
                 word = "";
-                for (int i = 0; i < len; i++) {
+                for (int n = 0; n < len; n++) {
                     word += "*";
                 }
             }
