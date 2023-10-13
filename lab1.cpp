@@ -10,73 +10,7 @@
 #include <sstream>
 #include <vector>
 #include <set>
-#include <io.h>
-#include <fcntl.h>
 #include <Windows.h>
-
-//void toLow(char& word) {
-//    switch (word) {
-//    case 'А': word = 'а'; break;
-//    case 'Б': word = 'б'; break;
-//    case 'В': word = 'в'; break;
-//    case 'Г': word = 'г'; break;
-//    case 'Д': word = 'д'; break;
-//    case 'Е': word = 'е'; break;
-//    case 'Ё': word = 'ё'; break;
-//    case 'Ж': word = 'ж'; break;
-//    case 'З': word = 'з'; break;
-//    case 'И': word = 'и'; break;
-//    case 'Й': word = 'й'; break;
-//    case 'К': word = 'к'; break;
-//    case 'Л': word = 'л'; break;
-//    case 'М': word = 'м'; break;
-//    case 'Н': word = 'н'; break;
-//    case 'О': word = 'о'; break;
-//    case 'П': word = 'п'; break;
-//    case 'Р': word = 'р'; break;
-//    case 'С': word = 'с'; break;
-//    case 'Т': word = 'т'; break;
-//    case 'У': word = 'у'; break;
-//    case 'Ф': word = 'ф'; break;
-//    case 'Х': word = 'х'; break;
-//    case 'Ц': word = 'ц'; break;
-//    case 'Ч': word = 'ч'; break;
-//    case 'Ш': word = 'ш'; break;
-//    case 'Щ': word = 'щ'; break;
-//    case 'Ъ': word = 'ъ'; break;
-//    case 'Ы': word = 'ы'; break;
-//    case 'Ь': word = 'ь'; break;
-//    case 'Э': word = 'э'; break;
-//    case 'Ю': word = 'ю'; break;
-//    case 'Я': word = 'я'; break;
-//    case 'A': word = 'a'; break;
-//    case 'B': word = 'b'; break;
-//    case 'C': word = 'c'; break;
-//    case 'D': word = 'd'; break;
-//    case 'E': word = 'e'; break;
-//    case 'F': word = 'f'; break;
-//    case 'G': word = 'g'; break;
-//    case 'H': word = 'h'; break;
-//    case 'I': word = 'i'; break;
-//    case 'J': word = 'j'; break;
-//    case 'K': word = 'k'; break;
-//    case 'L': word = 'l'; break;
-//    case 'M': word = 'm'; break;
-//    case 'N': word = 'n'; break;
-//    case 'O': word = 'o'; break;
-//    case 'P': word = 'p'; break;
-//    case 'Q': word = 'q'; break;
-//    case 'R': word = 'r'; break;
-//    case 'S': word = 's'; break;
-//    case 'T': word = 't'; break;
-//    case 'U': word = 'u'; break;
-//    case 'V': word = 'v'; break;
-//    case 'W': word = 'w'; break;
-//    case 'X': word = 'x'; break;
-//    case 'Y': word = 'y'; break;
-//    case 'Z': word = 'z'; break;
-//    }
-//}
 
 bool checkRus(char c) {
     if (c == 'А' || c == 'Б' || c == 'В' || c == 'Г' || c == 'Д' || c == 'Е' || c == 'Ё' || c == 'Ж' || c == 'З' || c == 'И' || c == 'Й' || c == 'К' || c == 'Л' || c == 'М' || c == 'Н' || c == 'О' || c == 'П' || c == 'Р' || c == 'С' || c == 'Т' || c == 'У' || c == 'Ф' || c == 'Х' || c == 'Ц' || c == 'Ч' || c == 'Ш' || c == 'Щ' || c == 'Ъ' || c == 'Ы' || c == 'Ь' || c == 'Э' || c == 'Ю' || c == 'Я' ||
@@ -161,15 +95,18 @@ int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
     setlocale(LC_ALL, "RUS");
+
     std::string input1path = "input1.txt";
     std::string input2path = "input2.txt";
     std::string outputpath = "output.txt";
+
     /*std::cout << "Введите имя файла с текстом: ";
     std::cin >> input1path;
     std::cout << "Введите имя файла с запрещенными словами: ";
     std::cin >> input2path;
     std::cout << "Введите имя выходного файла: ";
     std::cin >> outputpath;*/
+
     std::ifstream input1(input1path);
     std::ifstream input2(input2path);
     std::ofstream output(outputpath);
@@ -184,6 +121,7 @@ int main() {
     std::string line;
     std::set<char> alphabet = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+
     while (std::getline(input2, line)) { //из 2 файла добавляем слова в вектор
         size_t len = line.length();
         int i = 0;
@@ -195,7 +133,6 @@ int main() {
             if (line.back() == '-' && (alphabet.count(line[line.length() - 2]) == 1 || checkRus(line[line.length() - 2]))) {
                 std::getline(input2, line);
                 std::string last_word;
-                //std::cout << "Перенос: " << line << std::endl;
                 int n = 0;
                 while (alphabet.count(line[n]) == 1 || checkRus(line[n])) {
                     last_word = last_word + line[n];
@@ -212,51 +149,66 @@ int main() {
             i++;
         }
     }
-    std::cout << "Запрещенные слова: ";
-    for (int i = 0; i < forbidden_words.size(); i++) {
-        std::cout << forbidden_words[i] << ' ';
-    }
-    std::cout << "Текст: ";
+
     while (std::getline(input1, line)) {
         size_t len = line.length();
         int i = 0;
+        bool hyphen = false;
+        std::string last_word = "";
         while (i < len) {
-            while (alphabet.count(line[i]) == 1 || checkRus(line[i])) {
-                word = word + line[i];
+            hyphen = false;
+            last_word = "";
+            if (alphabet.count(line[i]) == 0 && !checkRus(line[i])) {
+                output << line[i];  
                 i++;
             }
-            if (line.back() == '-' && (alphabet.count(line[line.length() - 2]) == 1 || checkRus(line[line.length() - 2]))) {
-                std::getline(input1, line);
-                //std::cout << "Перенос: " << line << std::endl;
-                std::string last_word;
-                int n = 0;
-                while (alphabet.count(line[n]) == 1 || checkRus(line[n])) {
-                    last_word = last_word + line[n];
-                    n++;
+            else {
+                while (alphabet.count(line[i]) == 1 || checkRus(line[i])) {
+                    word = word + line[i];
+                    i++;
                 }
+
+                if (line.back() == '-' && (alphabet.count(line[line.length() - 2]) == 1 || checkRus(line[line.length() - 2])) && (i == line.length() - 1)) {
+                    hyphen = true;
+                    std::getline(input1, line);
+                    int n = 0;
+                    while (alphabet.count(line[n]) == 1 || checkRus(line[n])) {
+                        last_word = last_word + line[n];
+                        n++;
+                    }
+                    i = n;
+                    len = line.length();
+                }
+                size_t lenBefore = word.length();
                 word = word + last_word;
-                i = n;
-                len = line.length();
-            }
-            std::cout << word << ' ';
-            if (std::count(forbidden_words.begin(), forbidden_words.end(), toLower(word))) {
+                std::cout << word << ' ';
                 size_t len = word.length();
-                word = "";
-                for (int v = 0; v < len; v++) {
-                    word += "*";
+                if (std::count(forbidden_words.begin(), forbidden_words.end(), toLower(word))) {
+                    word = "";
+                    for (int v = 0; v < len; v++) {
+                        word += "*";
+                    }
                 }
+                int t = 0;
+                while (t <= len - 1) {
+                    if (t == lenBefore) {
+                        if (hyphen) {
+                            output << '-';
+                        }
+                        output << std::endl;
+                    }
+                    output << word[t];
+                    t++;
+                }
+                word = "";
             }
-            i++;
-            output << word << ' ';
-            word = "";
         }
         output << std::endl;
     }
-    if (checkRus('+')) {
-        std::cout << "HOW";
-    }
+
     input1.close();
     input2.close();
     output.close();
+
     return 0;
 }
