@@ -1,0 +1,207 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <limits>
+
+struct Computer {
+    int id;
+};
+
+struct Node {
+    std::string name;
+    std::vector<Node*> children;
+    std::vector<Computer*> computers;
+};
+
+void countComputers(Node* node, int& count, bool includeChildren) {
+    count += node->computers.size();
+    if (includeChildren) {
+        for (const auto& child : node->children) {
+            countComputers(child, count, includeChildren);
+        }
+    }
+}
+
+// Обновленная функция createTree для анализа исходных данных без использования seekg
+
+Node* createTree(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    Node* root = new Node{ line };
+
+    Node* faculty = nullptr;
+    Node* department = nullptr;
+    Node* lab = nullptr;
+    Node* current = root;
+
+    int level;
+
+    while (std::getline(file, line)) {
+        level = line.find_first_not_of('.');
+        line = line.substr(level);
+
+        if (level == 1) {  // Факультет
+            faculty = new Node{ line };
+            current->children.push_back(faculty);
+            department = nullptr;
+            lab = nullptr;
+        }
+        while (level == 2) {  // Кафедра или компьютер факультета
+            std::string nextLine;
+            (std::getline(file, nextLine));
+            int nextLevel = nextLine.find_first_not_of('.');
+            if (nextLevel == level || (nextLevel == level + 2)) {  // Компьютер факультета
+                int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
+                Computer* computer = new Computer{ computerId };
+                faculty->computers.push_back(computer);
+            }
+            else {  // Кафедра факультета
+                department = new Node{ line };
+                faculty->children.push_back(department);
+                lab = nullptr;
+            }
+            line = nextLine;
+            level = nextLevel;
+            line = line.substr(level);
+        }
+        while (level == 3) {  // Лаборатория или компьютер кафедры
+            std::string nextLine;
+            std::getline(file, nextLine);
+            int nextLevel = nextLine.find_first_not_of('.');
+            if (nextLevel <= level) {  // Компьютер кафедры
+                int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
+                Computer* computer = new Computer{ computerId };
+                department->computers.push_back(computer);
+            }
+            else {  // Лаборатория кафедры
+                lab = new Node{ line };
+                department->children.push_back(lab);
+            }
+            line = nextLine;
+            level = nextLevel;
+            line = line.substr(level);
+        }
+        if (level == 4) {  // Компьютер лаборатории
+            int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
+            Computer* computer = new Computer{ computerId };
+            lab->computers.push_back(computer);
+        }
+    }
+
+    return root;
+}
+
+void findMinMaxFaculty(Node* root) {
+    if (root->children.empty()) {
+        return;
+    }
+
+    std::string minFaculty, maxFaculty;
+    int minCount = std::numeric_limits<int>::max();
+    int maxCount = 0;
+
+    // Для каждого факультета выполняется подсчет количества компьютеров
+    for (const auto& faculty : root->children) {
+        int facultyCount = 0;
+        countComputers(faculty, facultyCount, true);  // Учитываем также компьютеры кафедр и лабораторий
+        if (facultyCount < minCount) {
+            minCount = facultyCount;
+            minFaculty = faculty->name;
+        }
+        if (facultyCount > maxCount) {
+            maxCount = facultyCount;
+            maxFaculty = faculty->name;
+        }
+    }
+
+    std::cout << "Факультет с минимальным количеством компьютеров: " << minFaculty << " (" << minCount << " компьютеров)" << std::endl;
+    std::cout << "Факультет с максимальным количеством компьютеров: " << maxFaculty << " (" << maxCount << " компьютеров)" << std::endl;
+}
+
+void findMinMaxDepartment(Node* root) {
+    if (root->children.empty()) {
+        return;
+    }
+
+    std::string minDepartment, maxDepartment;
+    int minCount = std::numeric_limits<int>::max();
+    int maxCount = 0;
+
+    // Для каждой кафедры выполняется подсчет количества компьютеров
+    for (const auto& faculty : root->children) {
+        for (const auto& department : faculty->children) {
+            int departmentCount = 0;
+            countComputers(department, departmentCount, true);  // Учитываем также компьютеры лабораторий
+            if (departmentCount < minCount) {
+                minCount = departmentCount;
+                minDepartment = department->name;
+            }
+            if (departmentCount > maxCount) {
+                maxCount = departmentCount;
+                maxDepartment = department->name;
+            }
+        }
+    }
+
+    std::cout << "Кафедра с минимальным количеством компьютеров: " << minDepartment << " (" << minCount << " компьютеров)" << std::endl;
+    std::cout << "Кафедра с максимальным количеством компьютеров: " << maxDepartment << " (" << maxCount << " компьютеров)" << std::endl;
+}
+
+
+void printTree(Node* node, const std::string& prefix = "") {
+    if (node == nullptr) {
+        return;
+    }
+
+    std::cout << prefix << node->name << std::endl;
+
+    if (!node->computers.empty()) {
+        for (const auto& computer : node->computers) {
+            std::cout << prefix << "   - Компьютер " << computer->id << std::endl;
+        }
+    }
+
+    if (!node->children.empty()) {
+        for (const auto& child : node->children) {
+            printTree(child, prefix + "   ");
+        }
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "RUS");
+
+    std::ifstream file("input.txt");
+    if (!file) {
+        std::cout << "Failed to open the file." << std::endl;
+        return 1;
+    }
+
+    Node* root = createTree(file);
+
+    // Поиск факультетов с минимальным и максимальным количеством компьютеров
+    findMinMaxFaculty(root);
+
+    // Поиск кафедр с минимальным и максимальным количеством компьютеров
+    findMinMaxDepartment(root);
+
+    printTree(root);
+
+    // Освобождение памяти, выделенной для узлов дерева
+    for (const auto& faculty : root->children) {
+        for (const auto& department : faculty->children) {
+            for (const auto& computer : department->computers) {
+                delete computer;
+            }
+            delete department;
+        }
+        for (const auto& computer : faculty->computers) {
+            delete computer;
+        }
+        delete faculty;
+    }
+    delete root;
+
+    return 0;
+}
