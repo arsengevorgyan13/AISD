@@ -1,8 +1,20 @@
+//15. В   некотором   институте   информация   об   имеющихся
+//компьютерах  задана   деревом.Сыновьям   корневой   вершины
+//соответствуют факультеты, факультеты в  свою очередь  делятся
+//на  кафедры, кафедры  могут иметь в своем составе лаборатории.
+//Компьютеры могут быть установлены в общих факультетских классах,
+//на кафедрах, в  лабораториях  и идентифицируются  уникальными
+//номерами.Требуется найти :
+//1) факультеты с минимальным и максимальным числом компьютеров;
+//2) кафедры с минимальным и максимальным числом компьютеров(11).
+
+// Геворгян Арсен ПС-23
+
 #include <iostream>
 #include <vector>
 #include <string>
+#include <Windows.h>
 #include <fstream>
-#include <limits>
 
 struct Computer {
     int id;
@@ -22,8 +34,6 @@ void countComputers(Node* node, int& count, bool includeChildren) {
         }
     }
 }
-
-// Обновленная функция createTree для анализа исходных данных без использования seekg
 
 Node* createTree(std::ifstream& file) {
     std::string line;
@@ -49,38 +59,53 @@ Node* createTree(std::ifstream& file) {
         }
         while (level == 2) {  // Кафедра или компьютер факультета
             std::string nextLine;
-            (std::getline(file, nextLine));
-            int nextLevel = nextLine.find_first_not_of('.');
-            if (nextLevel == level || (nextLevel == level + 2)) {  // Компьютер факультета
+            if (std::getline(file, nextLine)) {
+                int nextLevel = nextLine.find_first_not_of('.');
+                if (nextLevel == level || (nextLevel == level + 2)) {  // Компьютер факультета
+                    int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
+                    Computer* computer = new Computer{ computerId };
+                    faculty->computers.push_back(computer);
+                }
+                else {  // Кафедра факультета
+                    department = new Node{ line };
+                    faculty->children.push_back(department);
+                    lab = nullptr;
+                }
+                line = nextLine;
+                level = nextLevel;
+                line = line.substr(level);
+            }
+            else {
                 int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
                 Computer* computer = new Computer{ computerId };
                 faculty->computers.push_back(computer);
+                break;
             }
-            else {  // Кафедра факультета
-                department = new Node{ line };
-                faculty->children.push_back(department);
-                lab = nullptr;
-            }
-            line = nextLine;
-            level = nextLevel;
-            line = line.substr(level);
         }
         while (level == 3) {  // Лаборатория или компьютер кафедры
             std::string nextLine;
-            std::getline(file, nextLine);
-            int nextLevel = nextLine.find_first_not_of('.');
-            if (nextLevel <= level) {  // Компьютер кафедры
+            if (std::getline(file, nextLine)) {
+                int nextLevel = nextLine.find_first_not_of('.');
+                if (nextLevel <= level) {  // Компьютер кафедры
+                    int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
+                    Computer* computer = new Computer{ computerId };
+                    department->computers.push_back(computer);
+                }
+                else {  // Лаборатория кафедры
+                    lab = new Node{ line };
+                    department->children.push_back(lab);
+                }
+                line = nextLine;
+                level = nextLevel;
+                line = line.substr(level);
+                // тут
+            }
+            else {
                 int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
                 Computer* computer = new Computer{ computerId };
                 department->computers.push_back(computer);
+                break;
             }
-            else {  // Лаборатория кафедры
-                lab = new Node{ line };
-                department->children.push_back(lab);
-            }
-            line = nextLine;
-            level = nextLevel;
-            line = line.substr(level);
         }
         if (level == 4) {  // Компьютер лаборатории
             int computerId = std::stoi(line.substr(line.find_last_of(' ') + 1));
@@ -98,7 +123,7 @@ void findMinMaxFaculty(Node* root) {
     }
 
     std::string minFaculty, maxFaculty;
-    int minCount = std::numeric_limits<int>::max();
+    int minCount = INT_MAX;
     int maxCount = 0;
 
     // Для каждого факультета выполняется подсчет количества компьютеров
@@ -125,7 +150,7 @@ void findMinMaxDepartment(Node* root) {
     }
 
     std::string minDepartment, maxDepartment;
-    int minCount = std::numeric_limits<int>::max();
+    int minCount = INT_MAX;
     int maxCount = 0;
 
     // Для каждой кафедры выполняется подсчет количества компьютеров
@@ -171,10 +196,12 @@ void printTree(Node* node, const std::string& prefix = "") {
 
 int main() {
     setlocale(LC_ALL, "RUS");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
 
     std::ifstream file("input.txt");
     if (!file) {
-        std::cout << "Failed to open the file." << std::endl;
+        std::cout << "файл не был открыт" << std::endl;
         return 1;
     }
 
